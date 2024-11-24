@@ -15,6 +15,7 @@ import CaregiverAppointments from './Pages/CaregiverPages/CaregiverAppointments'
 import CaregiverProfile from './Pages/CaregiverPages/CaregiverProfile'; // New page
 import ActionLogs from './Pages/AdminPages/ActionLogs';
 import { AuthProvider, useAuth } from './context/authContext';
+import ScheduleAppointment from './Pages/CaregiverPages/ScheduleAppointment';
 
 // Protected Route Component
 const ProtectedRoute = ({ isAllowed, redirectPath = '/', children }) => {
@@ -92,6 +93,8 @@ const AppRoutes = () => {
           <Route index element={<CaregiverProfile />} /> {/* Default view */}
           <Route path="profile" element={<CaregiverProfile />} />
           <Route path="appointments" element={<CaregiverAppointments />} />
+          <Route path="schedule-appointment" element={<ScheduleAppointment />} />
+
         </Route>
 
         {/* Catch all route */}

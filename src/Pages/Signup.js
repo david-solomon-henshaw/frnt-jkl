@@ -1,10 +1,17 @@
 import React, { useState } from 'react';
-import { FaHeart } from 'react-icons/fa';
+import { FaEye, FaEyeSlash, FaHeart } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
-import { Alert, Button } from 'react-bootstrap'; // Import Bootstrap components
+
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+
 
 const SignUp = () => {
-  const [alert, setAlert] = useState(null); // State for managing alert messages
+
+  const [showPassword, setShowPassword] = useState(false);
+
+
   const navigate = useNavigate(); // For programmatic navigation
 
   // Add this function to validate the password
@@ -30,10 +37,7 @@ const handleSubmit = async (event) => {
 
   // Check password validation
   if (!validatePassword(formData.password)) {
-    setAlert({
-      variant: 'danger',
-      message: 'Password must be at least 8 characters long, include at least one number, one symbol, and one letter.',
-    });
+    toast.error('Password must be at least 8 characters long, include at least one number, one symbol, and one letter.');
     return;
   }
 
@@ -50,17 +54,17 @@ const handleSubmit = async (event) => {
     const data = await response.json();
 
     if (response.ok) {
-      setAlert({ variant: 'success', message: 'Account created successfully!' });
+      toast.success('Account created successfully!');
       event.target.reset();
       setTimeout(() => {
         navigate('/login');
       }, 2000);
     } else {
-      setAlert({ variant: 'danger', message: data.message || 'Something went wrong!' });
+      toast.error( `${data.message} || Something went wrong!`);
     }
   } catch (error) {
     console.log(error);
-    setAlert({ variant: 'danger', message: 'Network error. Please try again later.' });
+    toast.error('Network error. Please try again later.');
   }
 };
   return (
@@ -85,12 +89,6 @@ const handleSubmit = async (event) => {
         </p>
       </div>
 
-      {/* Display Alert */}
-      {alert && (
-        <Alert variant={alert.variant} className="text-center">
-          {alert.message}
-        </Alert>
-      )}
 
       <form onSubmit={handleSubmit} style={{ maxWidth: '750px', margin: '0 auto' }} className="row g-3">
         {/* Form Fields */}
@@ -148,21 +146,47 @@ const handleSubmit = async (event) => {
           </select>
         </div>
 
-        {/* Password */}
-        <div className="col-md-6 px-2">
-          <label htmlFor="password" className="form-label">Password</label>
-          <input 
-            type="password" 
-            id="password" 
-            className="form-control" 
-            placeholder="**********" 
-            required 
-            style={{ padding: '12px', fontSize: '16px' }}
-          />
-          <p style={{ fontSize: '10px', color: 'gray', marginTop: '5px', width: '100%', lineHeight: '1.2' }}>
-            Your password must be at least 8 characters long, with one number, one symbol, and no personal information like name or birthday.
-          </p>
-        </div>
+     {/* Password */}
+<div className="col-md-6 px-2 position-relative">
+  <label htmlFor="password" className="form-label">Password</label>
+  <div className="input-group">
+    <input
+      type={showPassword ? "text" : "password"}
+      id="password"
+      className="form-control"
+      placeholder="**********"
+      required
+      style={{ padding: '12px', fontSize: '16px' }}
+    />
+    <span
+      className="input-group-text bg-white  cursor-pointer"
+      onClick={() => setShowPassword(!showPassword)}
+      style={{
+        position: 'absolute',
+        top: '50%',
+        right: '10px',
+        transform: 'translateY(-50%)',
+        zIndex: 2,
+        cursor: 'pointer',
+      }}
+    >
+    {showPassword ? <FaEyeSlash /> : <FaEye />}
+
+    </span>
+  </div>
+  <p
+    style={{
+      fontSize: '10px',
+      color: 'red',
+      marginTop: '5px',
+      width: '100%',
+      lineHeight: '1.2',
+    }}
+  >
+    Your password must be at least 8 characters long, with one number, one symbol, and no personal information like name or birthday.
+  </p>
+</div>
+
 
         {/* Date of Birth */}
         <div className="col-md-6 px-2">
@@ -231,6 +255,9 @@ const handleSubmit = async (event) => {
           </p>
         </div>
       </form>
+
+      <ToastContainer position="top-right" autoClose={5000} hideProgressBar />
+
     </div>
   );
 };

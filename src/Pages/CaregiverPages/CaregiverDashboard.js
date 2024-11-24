@@ -1,25 +1,39 @@
 import React, { useState } from 'react';
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { 
   AiOutlineCalendar,
   AiOutlineSchedule,
   AiOutlineUser,
-  AiOutlineHeart,
   AiOutlineBell,
   AiOutlineUser as UserIcon,
   AiOutlineLogout
 } from 'react-icons/ai';
 import Header from '../../Components/Header'
+import { useAuth } from '../../context/authContext';
+
 
 
 const CaregiverDashboard = () => {
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const location = useLocation();
 
+  const navigate = useNavigate();
+
+
+  const { logout } = useAuth();
+
+  
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
+
   // Define caregiver-specific navigation links
   const caregiverNavigation = [
     { name: 'Profile', path: 'profile', icon: AiOutlineUser },
     { name: 'Appointments', path: 'appointments', icon: AiOutlineSchedule },
+    { name: 'Schedule Appointment', path: 'schedule-appointment', icon: AiOutlineCalendar }, // New menu item
   ];
 
   const isActivePath = (path) => location.pathname.includes(path);
@@ -71,26 +85,35 @@ const CaregiverDashboard = () => {
             </div>
 
             {/* Logout Button */}
-            <div className="border-top mt-auto">
-              <Link 
-                to="/"
+                      {/* Logout Button */}
+                      <div className="border-top mt-auto">
+              <span
+                onClick={handleLogout}
                 className="nav-link d-flex align-items-center"
                 style={{
                   color: inactiveColor,
                   padding: '1rem 1.5rem',
-                  transition: 'all 0.3s ease'
+                  transition: 'all 0.3s ease',
+                  borderRadius: '5px', // Rounded corners for button-like look
+                  cursor: 'pointer',   // Pointer cursor on hover
+                  display: 'inline-flex', // Ensures proper alignment
+                  textDecoration: 'none',
                 }}
+                onMouseEnter={(e) => e.target.style.color = 'red'} // Lighter background on hover
+                onMouseLeave={(e) => e.target.style.color = 'rgb(121, 121, 121)'} // Reset background on leave
               >
-                <AiOutlineLogout 
-                  size={20} 
-                  style={{ 
+                <AiOutlineLogout
+                  size={20}
+                  style={{
                     minWidth: '20px',
                     marginRight: '12px'
-                  }} 
+                  }}
                 />
                 <span>Logout</span>
-              </Link>
+              </span>
+
             </div>
+
           </div>
         </nav>
 

@@ -3,12 +3,18 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import LoadingModal from '../../Components/LoadingModal';
 import {jwtDecode} from 'jwt-decode';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+import { useAuth } from '../../context/authContext';
 
 const Appointments = () => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
+  const { logout } = useAuth();
+
   const navigate = useNavigate();
   const token = localStorage.getItem('token')
 
@@ -18,11 +24,12 @@ const Appointments = () => {
   useEffect(() => {
 
     if (!token) {
-      //setAlert({ message: 'You must be logged in to book an appointment', type: 'danger' });
-     // setLoading(false);
-     alert('no token')
-      return;
-    }
+      toast.error('You must be logged in to view your appointment');
+       setLoading(false);
+       logout();
+       navigate('/');
+       return;
+     }
     const fetchAppointments = async () => {
       setLoading(true);
       setError(null);
@@ -154,10 +161,10 @@ const Appointments = () => {
                   <tr key={appointment._id} className="align-middle">
                     {/* Patient requested date and time */}
                     <td style={tableStyles.td}>
-                      {new Date(appointment.patientRequestedDate).toLocaleDateString()}
+                      {new Date(appointment.RequestedDate).toLocaleDateString()}
                     </td>
                     <td style={tableStyles.td}>
-                      {formatTime(appointment.patientRequestedTime)}
+                      {formatTime(appointment.RequestedTime)}
                     </td>
 
                     {/* Department */}
@@ -176,7 +183,7 @@ const Appointments = () => {
                     <td style={tableStyles.td}>
                       {appointment.status !== 'pending'
                         ? appointment.startTime
-                          ? formatTime(appointment.startTime)
+                          ? formatTime(appointment.appointmentTime)
                           : 'Not Set'
                         : 'Pending Approval'}
                     </td>

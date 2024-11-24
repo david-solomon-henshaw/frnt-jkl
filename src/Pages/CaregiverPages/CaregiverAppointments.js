@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import LoadingModal from '../../Components/LoadingModal';
 import { Tab, Tabs } from 'react-bootstrap';
 import { FaRegCalendarTimes, FaEdit, FaCheck, FaHourglassHalf } from 'react-icons/fa';
-import {jwtDecode} from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 
 const Appointments = () => {
   const [appointments, setAppointments] = useState([]);
@@ -19,10 +19,7 @@ const Appointments = () => {
   const decoded = jwtDecode(token);
   const caregiverId = decoded.id
 
-
-
   useEffect(() => {
-
     if (!token) {
       setError('No token found in local storage');
       setLoading(false);
@@ -32,12 +29,14 @@ const Appointments = () => {
     const fetchAppointments = async () => {
       setLoading(true);
       setError(null);
-    
+
       try {
-        const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/caregivers/${caregiverId}/appointments`, 
-          { headers : {Authorization: `Bearer ${token}`}
-        });
+        const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/caregivers/${caregiverId}/appointments`,
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          });
         setAppointments(response.data);
+        console.log(response.data)
       } catch (err) {
         setError(err.response?.data?.message || 'Error fetching appointments');
       } finally {
@@ -48,19 +47,29 @@ const Appointments = () => {
   }, [caregiverId]);
 
   const formatTime = (time) => {
+    if (!time) {
+      return 'N/A';  // Fallback if time is undefined or null
+    }
+
     if (time.includes('T')) {
-      // It's an ISO string, so we need to extract just the time part.
       const date = new Date(time);
+      if (isNaN(date.getTime())) {
+        return 'Invalid Time'; // Fallback for invalid date
+      }
       return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
     }
-    // If it's already a time string (e.g., '10:27')
+
     const [hour, minute] = time.split(':');
+    if (!hour || !minute) {
+      return 'Invalid Time'; // Fallback for incorrect time format
+    }
+
     const date = new Date();
     date.setHours(hour);
     date.setMinutes(minute);
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
   };
-  
+
   const toggleEditMode = (appointmentId) => {
     setEditMode((prev) => (prev === appointmentId ? null : appointmentId));
   };
@@ -69,7 +78,6 @@ const Appointments = () => {
     setEndTime(e.target.value);
   };
 
-  // Function to get the current time in "HH:mm" format for the endTime
   const getCurrentTime = () => {
     const date = new Date();
     const hours = date.getHours().toString().padStart(2, '0');
@@ -82,9 +90,9 @@ const Appointments = () => {
       const response = await axios.put(`${process.env.REACT_APP_BACKEND_URL}/api/caregivers/${appointmentId}/appointment`, {
         status: newStatus,
         endTime: newStatus === 'completed' ? getCurrentTime() : null, // Send current time as endTime if status is 'completed'
-      },  {
+      }, {
         headers: {
-          Authorization: `Bearer ${token}`, // Add the token in the Authorization header
+          Authorization: `Bearer ${token}`,
         }
       });
       setAppointments((prevAppointments) =>
@@ -101,7 +109,7 @@ const Appointments = () => {
   };
 
   const startAppointment = (appointmentId) => {
-    updateAppointmentStatus(appointmentId, 'in-progress'); // Same function as updating status to 'in-progress'
+    updateAppointmentStatus(appointmentId, 'in-progress');
   };
 
   const tableStyles = {
@@ -145,78 +153,85 @@ const Appointments = () => {
         </div>
       );
     }
-  
+
     return (
       <div className="table-responsive" style={tableStyles.container}>
-        <table className="table mb-0" style={tableStyles.table}>
-          <thead>
-            <tr>
-              <th style={tableStyles.th}>Date Requested</th>
-              <th style={tableStyles.th}>Time Requested</th>
-              <th style={tableStyles.th}>Department</th>
-              <th style={tableStyles.th}>Admin Set Date</th>
-              <th style={{ ...tableStyles.th, ...tableStyles.lastColumn }}>
-                {tabStatus === 'completed' ? 'Completed Time' : 'Admin Set Start Time'}
-              </th>
-              {tabStatus !== 'completed' && (
-                <th style={tableStyles.th}>Actions</th>
-              )}
-            </tr>
-          </thead>
-          <tbody>
-            {filteredAppointments.map((appointment) => (
-              <tr key={appointment._id} className="align-middle">
-                <td style={tableStyles.td}>
-                  {new Date(appointment.patientRequestedDate).toLocaleDateString()}
-                </td>
-                <td style={tableStyles.td}>{formatTime(appointment.patientRequestedTime)}</td>
-                <td style={tableStyles.td}>{appointment.department}</td>
-                <td style={tableStyles.td}>
-                  {appointment.appointmentDate
-                    ? new Date(appointment.appointmentDate).toLocaleDateString()
-                    : 'Not Set'}
-                </td>
-                <td style={{ ...tableStyles.td, ...tableStyles.lastColumn }}>
-                  {tabStatus === 'completed'
-                    ? appointment.endTime
-                      ? formatTime(appointment.endTime)
-                      : 'Not Set'
-                    : appointment.startTime
-                    ? formatTime(appointment.startTime)
-                    : 'Not Set'}
-                </td>
-                {tabStatus !== 'completed' && (
-                  <td style={tableStyles.td}>
-                    {tabStatus === 'approved' && (
-                      <button
-                        className="btn btn-info btn-sm"
-                        onClick={() => startAppointment(appointment._id)}
-                      >
-                        <FaHourglassHalf /> Start
-                      </button>
-                    )}
-                    {tabStatus === 'in-progress' && (
-                      <button
-                        className="btn btn-success btn-sm"
-                        onClick={() => updateAppointmentStatus(appointment._id, 'completed')}
-                      >
-                        <FaCheck /> Completed
-                      </button>
-                    )}
-                  </td>
-                )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+<table className="table mb-0" style={tableStyles.table}>
+  <thead>
+    <tr>
+      <th style={tableStyles.th}>Date Requested</th>
+      <th style={tableStyles.th}>Time Requested</th>
+      <th style={tableStyles.th}>Patient</th>
+      {tabStatus === 'completed' && (
+        <>
+          <th style={tableStyles.th}>Start Time</th>
+          <th style={{ ...tableStyles.th, ...tableStyles.lastColumn }}>End Time</th>
+        </>
+      )}
+      {tabStatus !== 'pending' && tabStatus !== 'completed' && (
+        <th style={tableStyles.th}>Actions</th>
+      )}
+    </tr>
+  </thead>
+  <tbody>
+    {filteredAppointments.map((appointment) => (
+      <tr key={appointment._id} className="align-middle">
+        <td style={tableStyles.td}>
+          {new Date(appointment.RequestedDate).toLocaleDateString()}
+        </td>
+        <td style={tableStyles.td}>{formatTime(appointment.RequestedTime)}</td>
+        <td style={tableStyles.td}>
+          {appointment.patient ? `${appointment.patient.firstName} ${appointment.patient.lastName}` : 'N/A'}
+        </td>
+        {tabStatus === 'completed' && (
+          <>
+            <td style={tableStyles.td}>
+              {appointment.startTime ? formatTime(appointment.startTime) : 'Not Set'}
+            </td>
+            <td style={{ ...tableStyles.td, ...tableStyles.lastColumn }}>
+              {appointment.endTime ? formatTime(appointment.endTime) : 'Not Set'}
+            </td>
+          </>
+        )}
+        {tabStatus !== 'pending' && tabStatus !== 'completed' && (
+          <td style={tableStyles.td}>
+            {tabStatus === 'approved' && (
+              <button
+                className="btn btn-info btn-sm"
+                onClick={() => startAppointment(appointment._id)}
+              >
+                <FaHourglassHalf /> Start
+              </button>
+            )}
+            {tabStatus === 'in-progress' && (
+              <button
+                className="btn btn-success btn-sm"
+                onClick={() => updateAppointmentStatus(appointment._id, 'completed')}
+              >
+                <FaCheck /> Completed
+              </button>
+            )}
+          </td>
+        )}
+      </tr>
+    ))}
+  </tbody>
+</table>
       </div>
     );
   };
-  
+
   return (
     <div className="p-4">
       {error && <div className="alert alert-danger">{error}</div>}
       <Tabs defaultActiveKey="approved" id="appointments-tab" className="mb-3">
+
+        <Tab eventKey="pending" title="Pending">
+          {renderAppointmentsTable(
+            appointments.filter((appointment) => appointment.status === 'pending'),
+            'pending'
+          )}
+        </Tab>
         <Tab eventKey="approved" title="Approved">
           {renderAppointmentsTable(
             appointments.filter((appointment) => appointment.status === 'approved'),
@@ -235,6 +250,7 @@ const Appointments = () => {
             'completed'
           )}
         </Tab>
+
       </Tabs>
     </div>
   );

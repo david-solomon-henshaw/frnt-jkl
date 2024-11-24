@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { 
   AiOutlineHome,
   AiOutlineUser,
@@ -10,11 +10,20 @@ import {
   AiOutlineBell
 } from 'react-icons/ai';
 import Header from '../../Components/Header';
+import { useAuth } from '../../context/authContext';
 
 const PatientDashboard = () => {
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const location = useLocation();
+  const { logout } = useAuth();
 
+
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
   const navigation = [
     { name: 'Profile', path: 'profile', icon: AiOutlineUser },
     { name: 'Book Appointment', path: 'book-appointment', icon: AiOutlineCalendar },
@@ -71,27 +80,35 @@ const PatientDashboard = () => {
               </ul>
             </div>
 
-            {/* Logout Button */}
-            <div className="border-top mt-auto">
-              <Link 
-                to="/"
+          {/* Logout Button */}
+          <div className="border-top mt-auto">
+              <span
+                onClick={handleLogout}
                 className="nav-link d-flex align-items-center"
                 style={{
                   color: inactiveColor,
                   padding: '1rem 1.5rem',
-                  transition: 'all 0.3s ease'
+                  transition: 'all 0.3s ease',
+                  borderRadius: '5px', // Rounded corners for button-like look
+                  cursor: 'pointer',   // Pointer cursor on hover
+                  display: 'inline-flex', // Ensures proper alignment
+                  textDecoration: 'none',
                 }}
+                onMouseEnter={(e) => e.target.style.color = 'red'} // Lighter background on hover
+                onMouseLeave={(e) => e.target.style.color = 'rgb(121, 121, 121)'} // Reset background on leave
               >
-                <AiOutlineLogout 
-                  size={20} 
-                  style={{ 
+                <AiOutlineLogout
+                  size={20}
+                  style={{
                     minWidth: '20px',
                     marginRight: '12px'
-                  }} 
+                  }}
                 />
                 <span>Logout</span>
-              </Link>
+              </span>
+
             </div>
+
           </div>
         </nav>
 

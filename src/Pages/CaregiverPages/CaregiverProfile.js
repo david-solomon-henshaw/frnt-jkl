@@ -32,6 +32,7 @@ const CaregiverProfile = () => {
         }
         );
         setCaregiver(response.data);
+        console.log(typeof caregiver, caregiver)
       } catch (err) {
         setError('Error fetching caregiver data');
       } finally {
