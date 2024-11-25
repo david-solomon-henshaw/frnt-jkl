@@ -5,6 +5,7 @@ import { Tabs, Tab, Table, Button, Modal, Form } from "react-bootstrap";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from "axios";
+import {  FaExclamationCircle } from 'react-icons/fa';
 
 const Appointments = () => {
   const [appointments, setAppointments] = useState([]);
@@ -294,58 +295,80 @@ const Appointments = () => {
 
   return (
     <div>
-      <Tabs
+ <Tabs
         activeKey={activeTab}
         onSelect={setActiveTab}
         className="mb-3"
       >
-        {["pending", "approved", "in-progress", "completed", "canceled"].map((status) => (
-          <Tab eventKey={status} title={status.charAt(0).toUpperCase() + status.slice(1)} key={status}>
-        <div className="card rounded-3" style={tableStyles.card}>
-        <Table
-                responsive
-                hover
-                style={tableStyles.table}
-              >
-                <thead>
-                  <tr>
-                    {renderTableColumns(status).map((column, index) => (
-                      <th
-                        key={column.key}
-                        style={{
-                          ...tableStyles.th,
-                          ...(index === renderTableColumns(status).length - 1 ? tableStyles.lastColumn : {}),
-                        }}
-                      >
-                        {column.header}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {appointments
-                    .filter((appt) => appt.status === status)
-                    .map((appt) => (
-                      <tr key={appt._id}>
+        {["pending", "approved", "in-progress", "completed", "canceled"].map((status) => {
+          const filteredAppointments = appointments.filter(
+            (appt) => appt.status === status
+          );
+
+          return (
+            <Tab
+              eventKey={status}
+              title={status.charAt(0).toUpperCase() + status.slice(1)}
+              key={status}
+            >
+              <div className="card rounded-3" style={tableStyles.card}>
+                {filteredAppointments.length > 0 ? (
+                  <Table
+                    responsive
+                    hover
+                    style={tableStyles.table}
+                  >
+                    <thead>
+                      <tr>
                         {renderTableColumns(status).map((column, index) => (
-                          <td
-                            key={`${appt._id}-${column.key}`}
+                          <th
+                            key={column.key}
                             style={{
-                              ...tableStyles.td,
-                              ...(index === renderTableColumns(status).length - 1 ? tableStyles.lastColumn : {}),
+                              ...tableStyles.th,
+                              ...(index === renderTableColumns(status).length - 1
+                                ? tableStyles.lastColumn
+                                : {}),
                             }}
                           >
-                            {column.render(appt)}
-                          </td>
+                            {column.header}
+                          </th>
                         ))}
                       </tr>
-                    ))}
-                </tbody>
-              </Table>
-
-            </div>
-          </Tab>
-        ))}
+                    </thead>
+                    <tbody>
+                      {filteredAppointments.map((appt) => (
+                        <tr key={appt._id}>
+                          {renderTableColumns(status).map((column, index) => (
+                            <td
+                              key={`${appt._id}-${column.key}`}
+                              style={{
+                                ...tableStyles.td,
+                                ...(index === renderTableColumns(status).length - 1
+                                  ? tableStyles.lastColumn
+                                  : {}),
+                              }}
+                            >
+                              {column.render(appt)}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+                ) : (
+                  <div className="d-flex flex-column align-items-center py-5">
+                    <FaExclamationCircle
+                      size={50}
+                      color="gray"
+                      className="mb-3"
+                    />
+                    <p className="text-muted">No data to display in this tab</p>
+                  </div>
+                )}
+              </div>
+            </Tab>
+          );
+        })}
       </Tabs>
 
       <Modal show={showModal} onHide={handleModalClose}>
