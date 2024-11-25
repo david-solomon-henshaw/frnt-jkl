@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Button, Modal, Form, Row, Col } from 'react-bootstrap';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
+import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import icons from react-icons/fa
 import 'react-toastify/dist/ReactToastify.css';
 
 const CreateCaregiverModal = ({ show, handleClose }) => {
@@ -14,6 +15,11 @@ const CreateCaregiverModal = ({ show, handleClose }) => {
     password: '',
     confirmPassword: '',
   });
+  const [showPassword, setShowPassword] = useState(false);
+const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+const toggleShowPassword = () => setShowPassword(!showPassword);
+const toggleShowConfirmPassword = () => setShowConfirmPassword(!showConfirmPassword);
+
 
   const [touched, setTouched] = useState({
     firstName: false,
@@ -365,37 +371,55 @@ const CreateCaregiverModal = ({ show, handleClose }) => {
             </Row>
 
             <Row>
-              <Col md={6}>
-                <Form.Group controlId="formPassword" className="mb-3">
-                  <Form.Label>Password</Form.Label>
-                  <Form.Control
-                    type="password"
-                    name="password"
-                    placeholder="Enter password"
-                    value={caregiverData.password}
-                    onChange={handleInputChange}
-                    onBlur={handleBlur}
-                    isValid={touched.password && !errors.password}
-                    isInvalid={touched.password && !!errors.password}
-                  />
-                  <Form.Control.Feedback type="invalid">{errors.password}</Form.Control.Feedback>
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group controlId="formConfirmPassword" className="mb-3">
-                  <Form.Label>Confirm Password</Form.Label>
-                  <Form.Control
-                    type="password"
-                    name="confirmPassword"
-                    placeholder="Confirm password"
-                    value={caregiverData.confirmPassword}
-                    onChange={handleInputChange}
-                    onBlur={handleBlur}
-                    isValid={touched.confirmPassword && !errors.confirmPassword}
-                    isInvalid={touched.confirmPassword && !!errors.confirmPassword}
-                  />
-                  <Form.Control.Feedback type="invalid">{errors.confirmPassword}</Form.Control.Feedback>
-                </Form.Group>
+              <Col md={12}>
+              <Form.Group controlId="formPassword" className="mb-3">
+  <Form.Label>Password</Form.Label>
+  <div className="d-flex align-items-center position-relative">
+    <Form.Control
+      type={showPassword ? 'text' : 'password'} // Toggle between text and password
+      name="password"
+      placeholder="Enter password"
+      value={caregiverData.password}
+      onChange={handleInputChange}
+      onBlur={handleBlur}
+      isValid={touched.password && !errors.password}
+      isInvalid={touched.password && !!errors.password}
+    />
+    <div 
+      className="position-absolute end-0 pe-3"
+      style={{ cursor: 'pointer' }}
+      onClick={toggleShowPassword} // Toggle visibility
+    >
+      {showPassword ? <FaEyeSlash /> : <FaEye />} {/* React Icon */}
+    </div>
+    <Form.Control.Feedback type="invalid">{errors.password}</Form.Control.Feedback>
+  </div>
+</Form.Group>
+</Col>
+<Col md={12}>
+<Form.Group controlId="formConfirmPassword" className="mb-3">
+  <Form.Label>Confirm Password</Form.Label>
+  <div className="d-flex align-items-center position-relative">
+    <Form.Control
+      type={showConfirmPassword ? 'text' : 'password'} // Toggle between text and password
+      name="confirmPassword"
+      placeholder="Confirm password"
+      value={caregiverData.confirmPassword}
+      onChange={handleInputChange}
+      onBlur={handleBlur}
+      isValid={touched.confirmPassword && !errors.confirmPassword}
+      isInvalid={touched.confirmPassword && !!errors.confirmPassword}
+    />
+    <div 
+      className="position-absolute end-0 pe-3"
+      style={{ cursor: 'pointer' }}
+      onClick={toggleShowConfirmPassword} // Toggle visibility
+    >
+      {showConfirmPassword ? <FaEyeSlash /> : <FaEye />} {/* React Icon */}
+    </div>
+    <Form.Control.Feedback type="invalid">{errors.confirmPassword}</Form.Control.Feedback>
+  </div>
+</Form.Group>
               </Col>
             </Row>
 
