@@ -16,9 +16,9 @@ const CreateCaregiverModal = ({ show, handleClose }) => {
     confirmPassword: '',
   });
   const [showPassword, setShowPassword] = useState(false);
-const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-const toggleShowPassword = () => setShowPassword(!showPassword);
-const toggleShowConfirmPassword = () => setShowConfirmPassword(!showConfirmPassword);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const toggleShowPassword = () => setShowPassword(!showPassword);
+  const toggleShowConfirmPassword = () => setShowConfirmPassword(!showConfirmPassword);
 
 
   const [touched, setTouched] = useState({
@@ -43,7 +43,7 @@ const toggleShowConfirmPassword = () => setShowConfirmPassword(!showConfirmPassw
 
   const departments = [
     'Cardiology',
-    'Neurology', 
+    'Neurology',
     'Orthopedics',
     'Pediatrics',
     'Radiology',
@@ -67,7 +67,7 @@ const toggleShowConfirmPassword = () => setShowConfirmPassword(!showConfirmPassw
     'Ophthalmology',
     'Otolaryngology (ENT)',
     'Transplant Surgery'
-];
+  ];
   // Validate individual field
   const validateField = (field, value) => {
     switch (field) {
@@ -124,6 +124,8 @@ const toggleShowConfirmPassword = () => setShowConfirmPassword(!showConfirmPassw
         }
         break;
       case 'password':
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?])[A-Za-z\d!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]{8,}$/;
+
         if (!value) {
           setErrors((prevErrors) => ({
             ...prevErrors,
@@ -133,6 +135,11 @@ const toggleShowConfirmPassword = () => setShowConfirmPassword(!showConfirmPassw
           setErrors((prevErrors) => ({
             ...prevErrors,
             password: 'Password must be at least 8 characters long.',
+          }));
+        } else if (!passwordRegex.test(value)) {
+          setErrors((prevErrors) => ({
+            ...prevErrors,
+            password: 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.',
           }));
         } else {
           setErrors((prevErrors) => ({
@@ -198,30 +205,30 @@ const toggleShowConfirmPassword = () => setShowConfirmPassword(!showConfirmPassw
 
   const handleCreateCaregiver = async (e) => {
     e.preventDefault();
-  
+
     // Mark all fields as touched
     const allTouched = Object.keys(touched).reduce((acc, key) => ({
       ...acc,
       [key]: true,
     }), {});
     setTouched(allTouched);
-  
+
     // Validate all fields
     Object.keys(caregiverData).forEach((field) => validateField(field, caregiverData[field]));
-  
+
     // Check for errors
     const hasErrors = Object.values(errors).some((error) => error !== '');
     if (hasErrors) {
       toast.error('Please fix all errors before submitting.');
       return;
     }
-  
+
     try {
       // Get the token from local storage or cookies
       const token = localStorage.getItem('token'); // Adjust the storage method if needed
-  
+
       const response = await axios.post(
-        `${process.env.REACT_APP_BACKEND_URL}/api/admin/caregivers`, 
+        `${process.env.REACT_APP_BACKEND_URL}/api/admin/caregivers`,
         {
           ...caregiverData,
           available: true,
@@ -232,10 +239,10 @@ const toggleShowConfirmPassword = () => setShowConfirmPassword(!showConfirmPassw
           },
         }
       );
-  
+
       console.log('Caregiver created successfully:', response.data);
       toast.success('Caregiver created successfully!');
-  
+
       // Reset form
       setCaregiverData({
         firstName: '',
@@ -255,18 +262,28 @@ const toggleShowConfirmPassword = () => setShowConfirmPassword(!showConfirmPassw
         password: false,
         confirmPassword: false,
       });
-  
+
       setTimeout(handleClose, 2000);
     } catch (error) {
       console.error('Error creating caregiver:', error.response?.data?.message || error.message);
       toast.error('Error creating caregiver. Please try again.');
     }
   };
-  
+
   const getValidationState = (field) => {
     if (!touched[field]) return null;
     return errors[field] ? 'invalid' : 'valid';
   };
+
+  // Add this function before the return statement
+  const isFormValid = () => {
+    // Check if all required fields are filled
+    const allFieldsFilled = Object.values(caregiverData).every(value => value !== '');
+    // Check if there are no errors
+    const noErrors = Object.values(errors).every(error => error === '');
+    return allFieldsFilled && noErrors;
+  };
+
 
   return (
     <>
@@ -372,59 +389,69 @@ const toggleShowConfirmPassword = () => setShowConfirmPassword(!showConfirmPassw
 
             <Row>
               <Col md={12}>
-              <Form.Group controlId="formPassword" className="mb-3">
-  <Form.Label>Password</Form.Label>
-  <div className="d-flex align-items-center position-relative">
-    <Form.Control
-      type={showPassword ? 'text' : 'password'} // Toggle between text and password
-      name="password"
-      placeholder="Enter password"
-      value={caregiverData.password}
-      onChange={handleInputChange}
-      onBlur={handleBlur}
-      isValid={touched.password && !errors.password}
-      isInvalid={touched.password && !!errors.password}
-    />
-    <div 
-      className="position-absolute end-0 pe-3"
-      style={{ cursor: 'pointer' }}
-      onClick={toggleShowPassword} // Toggle visibility
-    >
-      {showPassword ? <FaEyeSlash /> : <FaEye />} {/* React Icon */}
-    </div>
-    <Form.Control.Feedback type="invalid">{errors.password}</Form.Control.Feedback>
-  </div>
-</Form.Group>
-</Col>
-<Col md={12}>
-<Form.Group controlId="formConfirmPassword" className="mb-3">
-  <Form.Label>Confirm Password</Form.Label>
-  <div className="d-flex align-items-center position-relative">
-    <Form.Control
-      type={showConfirmPassword ? 'text' : 'password'} // Toggle between text and password
-      name="confirmPassword"
-      placeholder="Confirm password"
-      value={caregiverData.confirmPassword}
-      onChange={handleInputChange}
-      onBlur={handleBlur}
-      isValid={touched.confirmPassword && !errors.confirmPassword}
-      isInvalid={touched.confirmPassword && !!errors.confirmPassword}
-    />
-    <div 
-      className="position-absolute end-0 pe-3"
-      style={{ cursor: 'pointer' }}
-      onClick={toggleShowConfirmPassword} // Toggle visibility
-    >
-      {showConfirmPassword ? <FaEyeSlash /> : <FaEye />} {/* React Icon */}
-    </div>
-    <Form.Control.Feedback type="invalid">{errors.confirmPassword}</Form.Control.Feedback>
-  </div>
-</Form.Group>
+                <Form.Group controlId="formPassword" className="mb-3">
+                  <Form.Label>Password</Form.Label>
+                  <div className="position-relative"> {/* Changed to position-relative */}
+                    <Form.Control
+                      type={showPassword ? 'text' : 'password'}
+                      name="password"
+                      placeholder="Enter password"
+                      value={caregiverData.password}
+                      onChange={handleInputChange}
+                      onBlur={handleBlur}
+                      isValid={touched.password && !errors.password}
+                      isInvalid={touched.password && !!errors.password}
+                      className="pe-5" /* Add padding to prevent text overlap with icon */
+                    />
+                    <div
+                      className="position-absolute top-50 end-0 translate-middle-y pe-3"
+                      style={{ cursor: 'pointer', zIndex: 2 }} /* Added zIndex to keep icon clickable */
+                      onClick={toggleShowPassword}
+                    >
+                      {showPassword ? <FaEyeSlash /> : <FaEye />}
+                    </div>
+                  </div>
+                  <Form.Control.Feedback type="invalid" style={{ display: 'block' }}> {/* Force feedback to display as block */}
+                    {errors.password}
+                  </Form.Control.Feedback>
+                </Form.Group>
+
+                <Form.Group controlId="formConfirmPassword" className="mb-3">
+                  <Form.Label>Confirm Password</Form.Label>
+                  <div className="position-relative">
+                    <Form.Control
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      name="confirmPassword"
+                      placeholder="Confirm password"
+                      value={caregiverData.confirmPassword}
+                      onChange={handleInputChange}
+                      onBlur={handleBlur}
+                      isValid={touched.confirmPassword && !errors.confirmPassword}
+                      isInvalid={touched.confirmPassword && !!errors.confirmPassword}
+                      className="pe-5"
+                    />
+                    <div
+                      className="position-absolute top-50 end-0 translate-middle-y pe-3"
+                      style={{ cursor: 'pointer', zIndex: 2 }}
+                      onClick={toggleShowConfirmPassword}
+                    >
+                      {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                    </div>
+                  </div>
+                  <Form.Control.Feedback type="invalid" style={{ display: 'block' }}>
+                    {errors.confirmPassword}
+                  </Form.Control.Feedback>
+                </Form.Group>
               </Col>
             </Row>
 
             <div className="d-grid gap-2">
-              <Button variant="primary" type="submit" size="lg">
+              <Button
+                variant="success"
+                type="submit"
+                size="lg"
+                disabled={!isFormValid()}
+              >
                 Create Caregiver
               </Button>
             </div>

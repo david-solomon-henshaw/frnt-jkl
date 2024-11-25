@@ -33,24 +33,55 @@ const CreateAdminModal = ({ show, handleClose }) => {
 
   useEffect(() => {
     if (show) {
-      firstNameRef.current.focus(); // Auto-focus on the first name field when the modal opens
+      firstNameRef.current.focus();
     }
   }, [show]);
 
   const validate = () => {
     const errors = {};
+    
+    // First Name Validation
     if (!adminData.firstName) errors.firstName = 'First name is required';
+    
+    // Last Name Validation
     if (!adminData.lastName) errors.lastName = 'Last name is required';
+    
+    // Email Validation
     if (!adminData.email) {
       errors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(adminData.email)) {
       errors.email = 'Email is invalid';
     }
-    if (adminData.password.length < 8) errors.password = 'Password must be at least 8 characters';
-    if (adminData.password !== adminData.confirmPassword) {
-      errors.confirmPassword = 'Passwords do not match';
+  
+   
+  // Regex for password rules
+  const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
+
+   // Password Validation
+   if (!adminData.password) {
+    errors.password = 'Password is required';
+  } else if (!passwordPattern.test(adminData.password)) {
+    errors.password = 'Password must be at least 8 characters long, include one lowercase letter, one uppercase letter, one number, and one special character';
+  }
+
+  // Confirm Password Validation
+  if (adminData.password !== adminData.confirmPassword) {
+    errors.confirmPassword = 'Passwords do not match';
+  }
+
+  return errors;
+  };
+  
+  const getPasswordError = () => {
+    const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
+  
+    if (touched.password) {
+      if (!adminData.password) return 'Password is required';
+      if (!passwordPattern.test(adminData.password)) {
+        return 'Password must be at least 8 characters long, include one lowercase letter, one uppercase letter, one number, and one special character';
+      }
     }
-    return errors;
+    return '';
   };
 
   const handleCreateAdmin = async (e) => {
@@ -66,7 +97,7 @@ const CreateAdminModal = ({ show, handleClose }) => {
       return;
     }
 
-    setIsLoading(true); // Start loading
+    setIsLoading(true);
 
     try {
       await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/admin/register`, {
@@ -74,9 +105,8 @@ const CreateAdminModal = ({ show, handleClose }) => {
         lastName: adminData.lastName,
         email: adminData.email,
         password: adminData.password,
-      },);
+      });
 
-      // Reset form after successful admin creation
       setAdminData({
         firstName: '',
         lastName: '',
@@ -91,11 +121,11 @@ const CreateAdminModal = ({ show, handleClose }) => {
         type: 'success',
       });
 
-      setShowSuccessToast(true); // Show success toast
+      setShowSuccessToast(true);
       setTimeout(() => {
         handleClose();
-        setShowSuccessToast(false); // Hide success toast
-      }, 2000); // Close modal after 2 seconds
+        setShowSuccessToast(false);
+      }, 2000);
 
     } catch (error) {
       console.error(error.response?.data?.message || error);
@@ -104,9 +134,9 @@ const CreateAdminModal = ({ show, handleClose }) => {
         message: error.response?.data?.message || 'Something went wrong.',
         type: 'danger',
       });
-      setShowErrorToast(true); // Show error toast
+      setShowErrorToast(true);
     } finally {
-      setIsLoading(false); // End loading
+      setIsLoading(false);
     }
   };
 
@@ -118,16 +148,15 @@ const CreateAdminModal = ({ show, handleClose }) => {
     return Object.keys(errors).length === 0;
   };
 
+  const isPasswordInvalid = touched.password && !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/.test(adminData.password);
   return (
     <>
-      {/* Success Toast */}
       {showSuccessToast && (
         <Toast>
           <Toast.Body>Admin created successfully!</Toast.Body>
         </Toast>
       )}
 
-      {/* Error Toast */}
       {showErrorToast && (
         <Toast>
           <Toast.Body>{alert.message}</Toast.Body>
@@ -157,7 +186,7 @@ const CreateAdminModal = ({ show, handleClose }) => {
                 isInvalid={touched.firstName && !adminData.firstName}
               />
               <Form.Control.Feedback type="invalid">
-                {touched.firstName && !adminData.firstName ? 'First name is required' : ''}
+                First name is required
               </Form.Control.Feedback>
             </Form.Group>
 
@@ -172,7 +201,7 @@ const CreateAdminModal = ({ show, handleClose }) => {
                 isInvalid={touched.lastName && !adminData.lastName}
               />
               <Form.Control.Feedback type="invalid">
-                {touched.lastName && !adminData.lastName ? 'Last name is required' : ''}
+                Last name is required
               </Form.Control.Feedback>
             </Form.Group>
 
@@ -184,7 +213,7 @@ const CreateAdminModal = ({ show, handleClose }) => {
                 value={adminData.email}
                 onChange={(e) => setAdminData({ ...adminData, email: e.target.value })}
                 onBlur={() => setTouched({ ...touched, email: true })}
-                isInvalid={touched.email && !adminData.email}
+                isInvalid={touched.email && (!adminData.email || !/\S+@\S+\.\S+/.test(adminData.email))}
               />
               <Form.Control.Feedback type="invalid">
                 {touched.email && !adminData.email ? 'Email is required' : ''}
@@ -194,21 +223,27 @@ const CreateAdminModal = ({ show, handleClose }) => {
 
             <Form.Group controlId="formPassword" className="mb-3">
               <Form.Label>Password</Form.Label>
-              <Form.Control
-                type={showPassword ? 'text' : 'password'}
-                placeholder="Enter password"
-                value={adminData.password}
-                onChange={(e) => setAdminData({ ...adminData, password: e.target.value })}
-                onBlur={() => setTouched({ ...touched, password: true })}
-                isInvalid={touched.password && !adminData.password}
-              />
-              <Button variant="link" onClick={togglePasswordVisibility}>
-                {showPassword ? 'Hide' : 'Show'}
-              </Button>
-              <Form.Control.Feedback type="invalid">
-                {touched.password && !adminData.password ? 'Password is required' : ''}
-                {touched.password && adminData.password && adminData.password.length < 8 ? 'Password must be at least 8 characters' : ''}
-              </Form.Control.Feedback>
+              <div className="position-relative">
+                <Form.Control
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Enter password"
+                  value={adminData.password}
+                  onChange={(e) => setAdminData({ ...adminData, password: e.target.value })}
+                  onBlur={() => setTouched({ ...touched, password: true })}
+                  isInvalid={isPasswordInvalid}
+                />
+                <Button 
+                  variant="link" 
+                  onClick={togglePasswordVisibility}
+                  className="position-absolute end-0 top-0"
+                  style={{ height: '100%', zIndex: 1 }}
+                >
+                  {showPassword ? 'Hide' : 'Show'}
+                </Button>
+                <Form.Control.Feedback type="invalid">
+                  {getPasswordError()}
+                </Form.Control.Feedback>
+              </div>
             </Form.Group>
 
             <Form.Group controlId="formConfirmPassword" className="mb-3">
@@ -222,7 +257,7 @@ const CreateAdminModal = ({ show, handleClose }) => {
                 isInvalid={touched.confirmPassword && adminData.password !== adminData.confirmPassword}
               />
               <Form.Control.Feedback type="invalid">
-                {touched.confirmPassword && adminData.password !== adminData.confirmPassword ? 'Passwords do not match' : ''}
+                Passwords do not match
               </Form.Control.Feedback>
             </Form.Group>
 
