@@ -36,9 +36,7 @@ const Appointments = () => {
       
       try {
         const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/appointments/patient/${patientId}`,
-          {headers : {
-            Authorization: `Bearer ${token}`,
-          }}
+        
         );
         setAppointments(response.data);
         console.log(response)
@@ -102,6 +100,8 @@ const Appointments = () => {
       return 'Invalid Time';
     }
   };
+
+  
   const tableStyles = {
     card: {
       border: 'none',

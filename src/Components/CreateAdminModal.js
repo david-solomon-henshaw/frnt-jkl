@@ -69,17 +69,12 @@ const CreateAdminModal = ({ show, handleClose }) => {
     setIsLoading(true); // Start loading
 
     try {
-      const token = localStorage.getItem('token'); // Assuming token is stored in localStorage
       await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/admin/register`, {
         firstName: adminData.firstName,
         lastName: adminData.lastName,
         email: adminData.email,
         password: adminData.password,
-      }, {
-        headers: {
-          'Authorization': `Bearer ${token}`, // Attach the token in the Authorization header
-        }
-      });
+      },);
 
       // Reset form after successful admin creation
       setAdminData({

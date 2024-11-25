@@ -23,7 +23,7 @@ export const AuthProvider = ({ children }) => {
           
           setUser({
             role: payload.role,
-            id: payload.id
+            id: payload.id,
           });
         } catch (error) {
           localStorage.removeItem('token');

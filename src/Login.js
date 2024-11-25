@@ -77,9 +77,11 @@ const Login = () => {
         const userData = verifyResponse.data.user;
         setUser({
           role: userData.role,
-          id: userData.id
+          id: userData.id,
+          ...(userData.role === 'caregiver' && { department: userData.department })
+
         });
-        console.log(userData.role)
+        console.log(userData, "user data ")
 
         navigate(`/${userData.role}`);
       }
@@ -175,7 +177,7 @@ const Login = () => {
             <div className="mb-3">
               <label htmlFor="otp" className="form-label">Enter OTP</label>
               <input
-                type="text"
+                type="number"
                 id="otp"
                 className="form-control"
                 placeholder="Enter OTP sent to your email"

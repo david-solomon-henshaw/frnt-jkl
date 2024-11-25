@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useAuth } from '../../context/authContext';
 
 
 
@@ -10,7 +11,8 @@ const ScheduleAppointment = () => {
   const [selectedPatient, setSelectedPatient] = useState('');
   const [patientRequestedDate, setPatientRequestedDate] = useState('');
   const [patientRequestedTime, setPatientRequestedTime] = useState('');
-  const [department, setDepartment] = useState('');
+  const { user } = useAuth();
+
   
   
 
@@ -34,7 +36,9 @@ const ScheduleAppointment = () => {
   
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const department = user.department;
 
+    console.log(user,'user ')
 
     // Validation
     if (!selectedPatient || !patientRequestedDate || !patientRequestedTime || !department) {
@@ -55,7 +59,7 @@ const ScheduleAppointment = () => {
     setSelectedPatient('');
     setPatientRequestedDate('');
     setPatientRequestedTime('');
-    setDepartment('');
+  
 
       toast.success('Appointment requested successfully!');
     } catch (error) {
@@ -91,21 +95,7 @@ const ScheduleAppointment = () => {
           </select>
         </div>
 
-        <div className="mb-3">
-          <label htmlFor="department" className="form-label">Department</label>
-          <select
-            id="department"
-            className="form-select"
-            value={department}
-            onChange={(e) => setDepartment(e.target.value)}
-            required
-          >
-            <option value="">Select Department</option>
-            <option value="Cardiology">Cardiology</option>
-            <option value="Neurology">Neurology</option>
-            <option value="Radiology">Radiology</option>
-          </select>
-        </div>
+      
 
         <div className="mb-3">
           <label htmlFor="patientRequestedDate" className="form-label">Appointment Date</label>

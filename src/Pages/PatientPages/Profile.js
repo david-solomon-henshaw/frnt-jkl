@@ -17,10 +17,7 @@ const PatientProfile = () => {
         // Get the token from localStorage
         const token = localStorage.getItem('token');
         if (!token) {
-         // setAlert({ message: 'You must be logged in to see your ptofile', type: 'danger' });
-         // setLoading(false);
-     alert('no token')
-
+      
           return;
         }
         // Decode the token to get the patient ID
