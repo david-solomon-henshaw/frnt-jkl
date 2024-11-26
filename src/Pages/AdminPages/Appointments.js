@@ -153,6 +153,8 @@ const Appointments = () => {
 
       handleModalClose();
     } catch (error) {
+
+      console.log(error)
       toast.error("Failed to reassign caregiver. Please try again.");
     }
   };
