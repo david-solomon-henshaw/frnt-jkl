@@ -32,7 +32,7 @@ const ActionLogs = () => {
         if (startDate) queryParams.append('startDate', startDate);
         if (endDate) queryParams.append('endDate', endDate);
 
-        const response = await axios.get(`http://${process.env.REACT_APP_BACKEND_URL}/api/admin/action-logs?${queryParams.toString()}`);
+        const response = await axios.get(`http://${process.env.REACT_APP_BACKEND_URL}/api/admin/action-logs`);
         setLogs(response.data);
       } catch (err) {
         const errorMessage = getErrorMessage(err);
